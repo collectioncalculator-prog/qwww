@@ -44,7 +44,10 @@ async function generateArticle(keyword) {
       })
     });
 
-    if (!response.ok) throw new Error('API request failed');
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error?.message || `API request failed with status ${response.status}`);
+    }
 
     const data = await response.json();
     let content = data.choices[0].message.content;
@@ -55,7 +58,12 @@ async function generateArticle(keyword) {
     displayArticle(content);
   } catch (error) {
     console.error(error);
-    articleOutput.innerHTML = `<p class="text-red-500 font-medium">Sorry, I couldn't generate the article. Please check your API key or connection.</p>`;
+    articleOutput.innerHTML = `
+      <div class="bg-red-50 border border-red-200 rounded-xl p-6 text-red-700">
+        <p class="font-bold mb-1">Generation Failed</p>
+        <p class="text-sm opacity-90">${error.message}</p>
+      </div>
+    `;
   } finally {
     generateBtn.disabled = false;
     loadingState.classList.add('hidden');
