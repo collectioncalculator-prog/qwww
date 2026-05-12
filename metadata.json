@@ -1,0 +1,6 @@
+{
+  "name": "AI Article Writer",
+  "description": "A minimalist article generator powered by OpenRouter API.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
