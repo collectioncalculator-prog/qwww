@@ -23,12 +23,10 @@ async function generateArticle(keyword) {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
-        "HTTP-Referer": window.location.origin,
-        "X-Title": "AI Article Writer",
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "google/gemini-2.0-flash-001",
+        model: "google/gemma-2-9b-it:free",
         messages: [
           {
             role: "user",
