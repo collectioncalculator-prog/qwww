@@ -7,7 +7,7 @@ const generateBtn = document.getElementById('generateBtn');
 const loadingState = document.getElementById('loadingState');
 const articleOutput = document.getElementById('articleOutput');
 
-const OPENROUTER_API_KEY = "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";
+const OPENROUTER_API_KEY = "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";
 
 async function generateArticle(keyword) {
   if (!keyword) return;
@@ -22,11 +22,11 @@ async function generateArticle(keyword) {
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+        "Authorization": `Bearer ${OPENROUTER_API_KEY.trim()}`,
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "google/gemma-2-9b-it:free",
+        model: "nvidia/nemotron-3-super-120b-a12b:free",
         messages: [
           {
             role: "user",
@@ -43,11 +43,22 @@ async function generateArticle(keyword) {
     });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error?.message || `API request failed with status ${response.status}`);
+      const errorText = await response.text();
+      let errorMessage = `Status ${response.status}: ${response.statusText}`;
+      try {
+        const errorJson = JSON.parse(errorText);
+        errorMessage = errorJson.error?.message || errorMessage;
+      } catch (e) {
+        errorMessage = errorText || errorMessage;
+      }
+      throw new Error(errorMessage);
     }
 
     const data = await response.json();
+    if (!data.choices || data.choices.length === 0) {
+      throw new Error("No content generated. Please check your OpenRouter balance or account status.");
+    }
+
     let content = data.choices[0].message.content;
     
     // Safety check to remove any markdown code block indicators if the AI adds them
@@ -55,11 +66,12 @@ async function generateArticle(keyword) {
     
     displayArticle(content);
   } catch (error) {
-    console.error(error);
+    console.error("Detailed Error:", error);
     articleOutput.innerHTML = `
       <div class="bg-red-50 border border-red-200 rounded-xl p-6 text-red-700">
-        <p class="font-bold mb-1">Generation Failed</p>
-        <p class="text-sm opacity-90">${error.message}</p>
+        <p class="font-bold mb-1 tracking-tight">API Error Detected</p>
+        <p class="text-sm font-mono bg-white/50 p-2 rounded mt-2 border border-red-100">${error.message}</p>
+        <p class="text-[10px] uppercase tracking-wider mt-4 opacity-70">Likely cause: API key invalidation or OpenRouter service restriction. Ensure your key has credits.</p>
       </div>
     `;
   } finally {
