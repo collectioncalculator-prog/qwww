@@ -7,7 +7,7 @@ const generateBtn = document.getElementById('generateBtn');
 const loadingState = document.getElementById('loadingState');
 const articleOutput = document.getElementById('articleOutput');
 
-const OPENROUTER_API_KEY = "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";
+const OPENROUTER_API_KEY = "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";
 
 async function generateArticle(keyword) {
   if (!keyword) return;
